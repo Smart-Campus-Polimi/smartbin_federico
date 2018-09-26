@@ -53,18 +53,18 @@
 
 #if IOT_WIFI == 0
   //MQTT info
-  #define mqtt_server "93.50.134.152"
-  #define mqtt_user "smartbin"
-  #define mqtt_password "test123"
+  #define mqtt_server ""
+  #define mqtt_user ""
+  #define mqtt_password ""
 
   #if UNI == 1
     //Wifi lab
-    #define wifi_ssid "wlan_saltuaria"
-    #define wifi_password "antlabpolitecnicomilano"
+    #define wifi_ssid ""
+    #define wifi_password ""
   #else
     //Wifi casa
-    #define wifi_ssid "Yeah science, bitch!"
-    #define wifi_password "@Ste@Fed@Sil@"
+    #define wifi_ssid ""
+    #define wifi_password ""
   #endif
 #else
   //MQTT info

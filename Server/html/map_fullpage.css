@@ -1,0 +1,100 @@
+body, html {
+    height: 100%;
+}
+
+div#container {
+	position: relative;
+	width: 1300px;
+	height: 1300px;
+}
+
+canvas#viewport, div#all_but { 
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	top: 0;
+	left: 0;
+}
+
+/*
+The canvas is under the panel with the buttons
+*/
+canvas#viewport {
+	z-index: 1;
+}
+
+div#all_but {
+	z-index: 2;
+}
+
+/*
+Trasparent button over the bin
+*/
+.bin_button {
+	position: absolute;
+	background-color: Transparent;
+    background-repeat:no-repeat;
+    border: none;
+    cursor:pointer;
+    overflow: hidden;
+    outline:none;
+	width: 24px;
+	height: 24px;
+	
+}
+
+.bg {
+    /* The image used */
+    background-image: url("ED20.png");
+
+    /* Full height */
+    height: 100%;
+
+    /* Center and scale the image nicely */
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+/*
+ * Key theme
+ */
+ 
+div#key_bin {
+	display:flex;
+    align-items: center; /* Vertical center alignment */
+    justify-content: center;
+ }
+
+span.text {
+	display: inline-block;
+	height: 100%;
+}
+
+div.cell {
+	display: inline-block;
+	height: 30px;
+	width: 160px;
+	text-align: center;
+	padding-top: 4px;
+	padding-bottom: 4px;
+	line-height: 30px;
+	vertical-align: middle;
+	margin-top: 2px;
+	background: grey;
+}
+
+div.red {
+	color: #ff4d4d;
+	background-color: black;
+}
+ 
+div.yellow {
+	color: #ffff4d;
+	background-color: black;
+} 
+
+div.green {
+	color: #4dff4d;
+	background-color: black;
+}

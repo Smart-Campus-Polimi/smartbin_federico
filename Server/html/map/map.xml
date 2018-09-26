@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map>
+
+	<place placeid="0001">
+	 	<name>ANTLAB</name>
+	 	<location>0rd floor</location>
+	 	<directions>
+	 		<rasp id="A" final="False">sx</rasp>
+	 		<rasp id="B" final="False">down</rasp>
+	 		<rasp id="C" final="False">dx</rasp>
+	 		<rasp id="D" final="True">down</rasp>
+	 	</directions>
+	 </place>
+
+	 <place placeid="0002">
+	 	<name>ISPG</name>
+	 	<location>0rd floor</location>
+	 	<directions>
+	 		<rasp id="A" final="False">sx</rasp>
+	 		<rasp id="B" final="False">down</rasp>
+	 		<rasp id="C" final="False">dx</rasp>
+	 		<rasp id="D" final="True">down</rasp>
+	 	</directions>
+	 </place>
+
+	 <place placeid="0003">
+	 	<name>Room PT2</name>
+	 	<location>0rd floor</location>
+	 	<directions>
+	 		<rasp id="A" final="False">sx</rasp>
+	 		<rasp id="B" final="False">down</rasp>
+	 		<rasp id="C" final="False">down</rasp>
+	 		<rasp id="D" final="True">down</rasp>
+	 	</directions>
+	 </place>
+
+	 <place placeid="0004">
+	 	<name>Bio and Web enginnering LAB</name>
+	 	<location>0rd floor</location>
+	 	<directions>
+	 		<rasp id="A" final="False">dx</rasp>
+	 		<rasp id="B" final="False">down</rasp>
+	 		<rasp id="C" final="False">down</rasp>
+	 		<rasp id="D" final="True">down</rasp>
+	 	</directions>
+	 </place>
+
+	 <place placeid="0005">
+	 	<name>Stanza pranzo ANTLAB/ISPG</name>
+	 	<location>0rd floor</location>
+	 	<directions>
+	 		<rasp id="A" final="False">sx</rasp>
+	 		<rasp id="B" final="False">down</rasp>
+	 		<rasp id="C" final="False">down</rasp>
+	 		<rasp id="D" final="True">down</rasp>
+	 	</directions>
+	 </place>
+
+	 <place placeid="3403">
+	 	<name>Alessandro Redondi</name>
+	 	<location>3rd floor</location>
+	 	<directions>
+	 		<rasp id="A" final="False">up</rasp>
+	 		<rasp id="B" final="False">sx</rasp>
+	 		<rasp id="C" final="False">dx</rasp>
+	 		<rasp id="D" final="True">sx</rasp>
+	 	</directions>
+	 </place>
+
+	  <place placeid="3695">
+	 	<name>Matteo Cesana</name>
+	 	<location>3rd floor</location>
+	 	<directions>
+	 		<rasp id="A" final="False">up</rasp>
+	 		<rasp id="B" final="False">sx</rasp>
+	 		<rasp id="C" final="False">dx</rasp>
+	 		<rasp id="D" final="True">sx</rasp>
+	 	</directions>
+	 </place>
+
+
+	  <place placeid="3449">
+	 	<name>Antonio Capone</name>
+	 	<location>3rd floor</location>
+	 	<directions>
+	 		<rasp id="A" final="False">up</rasp>
+	 		<rasp id="B" final="False">sx</rasp>
+	 		<rasp id="C" final="False">dx</rasp>
+	 		<rasp id="D" final="True">up</rasp>
+	 	</directions>
+	 </place>
+
+	  <place placeid="3657">
+	 	<name>Ilario Filippini</name>
+	 	<location>3rd floor</location>
+	 	<directions>
+	 		<rasp id="A" final="False">up</rasp>
+	 		<rasp id="B" final="False">sx</rasp>
+	 		<rasp id="C" final="False">dx</rasp>
+	 		<rasp id="D" final="True">up</rasp>
+	 	</directions>
+	 </place>
+</map>
