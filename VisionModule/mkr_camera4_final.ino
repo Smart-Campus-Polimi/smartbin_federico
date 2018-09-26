@@ -33,17 +33,17 @@
 #define TRIG_PIN 7
 #if IOT_WIFI == 0
   //MQTT info
-  #define host "smartbin.ddns.net"
+  #define host ""
   #define api_page "/image_api.php"
 
   #if UNI == 1
     //Wifi lab
-    #define wifi_ssid "wlan_saltuaria"
-    #define wifi_password "antlabpolitecnicomilano"
+    #define wifi_ssid ""
+    #define wifi_password ""
   #else
     //Wifi casa
-    #define wifi_ssid "Yeah science, bitch!"
-    #define wifi_password "@Ste@Fed@Sil@"
+    #define wifi_ssid ""
+    #define wifi_password ""
   #endif
 #else
   //MQTT info
