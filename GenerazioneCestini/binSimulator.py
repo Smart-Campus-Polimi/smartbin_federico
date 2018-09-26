@@ -4,9 +4,11 @@ import numpy as np
 import scipy
 import scipy.stats
 import paho.mqtt.client as mqtt #import the client1
-import sqlite3
+#import sqlite3
 from sqlite3 import Error
 from scipy import spatial
+
+import mysql.connector
 
 
 #def on_log(client,userdata, level,buf):
@@ -176,7 +178,8 @@ total_add_waste_size=np.zeros(s)
 add_waste_weight=np.zeros(s)
 total_add_waste_weight=np.zeros(s)
 
-broker="192.168.0.6"
+#broker="192.168.0.6"
+broker="ec2-35-166-12-244.us-west-2.compute.amazonaws.com"
 client = mqtt.Client("python1") #create new instances
 
 client.on_connect=on_connect #bind call back function
@@ -187,7 +190,12 @@ print("Connecting to broker ",broker)
 
 client.connect(broker) #connect to broker
 client.loop_start() #start loop
-conn=sqlite3.connect("C:\\sqlite\pythonsqlite.db") #connecting to the db
+#conn=sqlite3.connect("C:\\sqlite\pythonsqlite.db") #connecting to the db
+
+conn = mysql.connector.connect(user='root', password='root',
+                              host='10.79.1.176',
+                              database='bin_test')
+
 c=conn.cursor() #cursor to create, modify and query tables in the db
 c.execute('''DROP TABLE records''') #drop the old table
 c.execute('''CREATE TABLE records   
@@ -210,7 +218,7 @@ for i in range(N):
 
 print(pos)
 
-while(1):
+while True:
 
     if count%24==0:
         day=day+1
