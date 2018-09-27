@@ -1,13 +1,16 @@
+#!/usr/bin/python3
+
 import simpy
 import random
 import numpy as np
 import scipy
 import scipy.stats
-import paho.mqtt.client as mqtt #import the client1
-#import sqlite3
+import paho.mqtt.client as mqtt
 from sqlite3 import Error
 from scipy import spatial
+from time import sleep
 
+import configparser
 import mysql.connector
 
 
@@ -152,6 +155,8 @@ def waste_reposition(number_of_bins, next_bin_size, current_bin_position, waste_
                 
             
 N=10 #number of bins
+TIME = 3600
+TOTAL_HEIGHT = 120 #cm of the bin  
 weight=[]  #Weights
 size=[]  #heights
 usage=[] #usage
@@ -178,9 +183,19 @@ total_add_waste_size=np.zeros(s)
 add_waste_weight=np.zeros(s)
 total_add_waste_weight=np.zeros(s)
 
-#broker="192.168.0.6"
-broker="ec2-35-166-12-244.us-west-2.compute.amazonaws.com"
+
+config = configparser.ConfigParser()
+config.read('secret.ini')
+
+#broker='ec2-35-166-12-244.us-west-2.compute.amazonaws.com'
+broker = config['DEFAULT']['HOST']
+
+user = config['DATABASE']['USER']
+password = config['DATABASE']['PASSWORD']
+database = config['DATABASE']['DB_NAME']
+
 client = mqtt.Client("python1") #create new instances
+
 
 client.on_connect=on_connect #bind call back function
 client.on_disconnect=on_disconnect
@@ -190,16 +205,11 @@ print("Connecting to broker ",broker)
 
 client.connect(broker) #connect to broker
 client.loop_start() #start loop
-#conn=sqlite3.connect("C:\\sqlite\pythonsqlite.db") #connecting to the db
 
-conn = mysql.connector.connect(user='root', password='root',
-                              host='10.79.1.176',
-                              database='bin_test')
 
-c=conn.cursor() #cursor to create, modify and query tables in the db
-c.execute('''DROP TABLE records''') #drop the old table
-c.execute('''CREATE TABLE records   
-             (week text,day text, hour integer, bin text, height real, weight real)''')
+#c.execute('''DROP TABLE records''') #drop the old table
+#c.execute('''CREATE TABLE records   
+ #            (week text,day text, hour integer, bin text, height real, weight real)''')
 
 
 for i in range(N):
@@ -238,6 +248,11 @@ while True:
     if day%7==0 and count==0:
         week=week+1
 
+    conn = mysql.connector.connect(user=user,
+                                   password=password,
+                                   host=broker,
+                                   database=database)
+
     for i in range (N):
         
         size[i]=dist_matrix_size.item((i, j))+total_add_waste_size.item((i,j))
@@ -261,9 +276,9 @@ while True:
             total_add_waste_weight=np.cumsum(add_waste_weight,axis=1)
          
 
-        bin_name= "bin%s" % i
-        bin_level= size[i]
-        bin_weight= weight[i]
+        bin_name= "12%s" % i
+        bin_level= size[i] + random.choice([-2,-1, 0, 0, 0.5, 0, 1, 2 ,3])
+        bin_weight= weight[i] * 17  + random.choice([-2,-1, 0, 0, 0.5, 0, 1, 2 ,3])
         bin_position_lon=pos[i][0]
         bin_position_lat=pos[i][1]
         
@@ -273,9 +288,17 @@ while True:
         client.publish("house/%s/position_lon" % bin_name, bin_position_lon)
         client.publish("house/%s/position_lat" % bin_name, bin_position_lat)
         record=[week, day_of_week, count, bin_name, bin_level, bin_weight]
-        c.execute("INSERT INTO records VALUES (?,?,?,?,?,?)", record) 
+        
+
+        
+
+        c=conn.cursor() #cursor to create, modify and query tables in the db
+        weight_record = [bin_name, bin_weight]
+        height_record = [bin_name, bin_level, TOTAL_HEIGHT]
+        c.execute("INSERT INTO bin_weight (bin_id, weight) VALUES (%s,%s)", weight_record) 
+        c.execute("INSERT INTO bin_height (bin_id, height, total_height) VALUES (%s,%s,%s)", height_record) 
+
         conn.commit()
-            
 
 
         
@@ -284,7 +307,10 @@ while True:
             print("Warning, the bin %s is full" % i)
         else:
             client.publish("house/%s/alert" % bin_name, " ")
-                 
+
+
+
+    conn.close()                 
     j=j+1
     
     day_of_week=dow(day)
@@ -298,3 +324,4 @@ while True:
     count=count+1
     
     
+    sleep(TIME)
