@@ -9,6 +9,8 @@ import paho.mqtt.client as mqtt
 from sqlite3 import Error
 from scipy import spatial
 from time import sleep
+from time import localtime, strftime
+import json
 
 import configparser
 import mysql.connector
@@ -88,8 +90,7 @@ def dist_day(number_of_bins, bin_behavior, day, size, weight, previous_result_si
         size[i]=a
         weight[i]=b
         
-    weekday=dow(day)
-    if weekday=="Saturday" or weekday=="Sunday":
+    if day=="Sat" or day=="Sun":
         bin_behavior=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     mult_matrix_size=np.outer(size, bin_behavior)
     mult_matrix_weight=np.outer(weight, bin_behavior)
@@ -103,25 +104,7 @@ def dist_day(number_of_bins, bin_behavior, day, size, weight, previous_result_si
     dist_matrix_weight=np.clip(dist_matrix_weight, 0, 100)
     return dist_matrix_size, dist_matrix_weight
     
-def dow(day):
-
-    if day%7==0:
-        weekday="Sunday"
-    if day%7==1:
-        weekday="Monday"
-    if day%7==2:
-        weekday="Tuesday"
-    if day%7==3:
-        weekday="Wednesday"
-    if day%7==4:
-        weekday="Thursday"
-    if day%7==5:
-        weekday="Friday"
-    if day%7==6:
-        weekday="Saturday"
-    return weekday
-
-def recolection(day, hour, recolection_day, recolection_hour, size, weight, total_add_waste_size, total_add_waste_weight):
+def recolection(day, hour, recolection_day, recolection_hour, size, weight, total_add_waste_size, total_add_waste_weight, count):
 
     if day in recolection_day and hour == recolection_hour:
         for i in range(len(size)):
@@ -134,6 +117,9 @@ def recolection(day, hour, recolection_day, recolection_hour, size, weight, tota
             total_add_waste_weight[total_add_waste_weight>0]=0.0
             add_waste_weight[add_waste_weight>0]=0.0
         print ("collected")
+
+    print("count: ")
+    print(count)
 
 def waste_reposition(number_of_bins, next_bin_size, current_bin_position, waste_size, waste_weight, index, count, counter):
     if next_bin_size+waste_size<=100:
@@ -152,6 +138,8 @@ def waste_reposition(number_of_bins, next_bin_size, current_bin_position, waste_
             else:
                 add_waste_size[ind,count]=0
                 add_waste_weight[ind,count]=0
+
+
                 
             
 N=10 #number of bins
@@ -162,12 +150,11 @@ size=[]  #heights
 usage=[] #usage
 pos=[] #position of the bins
 bin_full=[]
-count=1  #hours
+#count=1  #hours
 day=1    #day
 week=0   #week
-day_of_week = "Monday"
-recolection_day="Tuesday", "Thursday"
-recolection_hour= 22
+recolection_day="Tue", "Thu"
+recolection_hour= 18
 bin_behavior=[0, 0, 0, 0, 0, 0, 0, 0.02, 0.02, 0.1, 0.1, 0.02, 0.2, 0.2, 0.02, 0.02, 0.1, 0.1, 0.02, 0.02, 0.02, 0.02, 0, 0]
 j=0
 close_hour=21
@@ -187,7 +174,6 @@ total_add_waste_weight=np.zeros(s)
 config = configparser.ConfigParser()
 config.read('secret.ini')
 
-#broker='ec2-35-166-12-244.us-west-2.compute.amazonaws.com'
 broker = config['DEFAULT']['HOST']
 
 user = config['DATABASE']['USER']
@@ -199,7 +185,6 @@ client = mqtt.Client("python1") #create new instances
 
 client.on_connect=on_connect #bind call back function
 client.on_disconnect=on_disconnect
-#client.on_log=on_log
 client.on_message=on_message
 print("Connecting to broker ",broker)
 
@@ -207,9 +192,6 @@ client.connect(broker) #connect to broker
 client.loop_start() #start loop
 
 
-#c.execute('''DROP TABLE records''') #drop the old table
-#c.execute('''CREATE TABLE records   
- #            (week text,day text, hour integer, bin text, height real, weight real)''')
 
 
 for i in range(N):
@@ -217,7 +199,7 @@ for i in range(N):
         weight.append(i)
         size.append(i)
         usability(N, usage)
-        [a,b]=position(sizex1, sizex2, sizey1, sizey2)
+        [a,b] = position(sizex1, sizex2, sizey1, sizey2)
         pos.append([a,b])
         bin_full.append(False)
         
@@ -226,13 +208,20 @@ for i in range(N):
         generated_dist=False
         print("ok")
 
-print(pos)
 
 while True:
 
-    if count%24==0:
-        day=day+1
-        count=0
+    now = strftime("%a; %d; %b; %Y; %H:%M:%S", localtime())
+    now = now.split(";")
+    print(now)
+    day_of_week= now[0]
+    current_time = now[4].split(":")
+    current_hour = int(current_time[0])
+
+
+    if current_hour%24==0:
+        #day=day+1
+        #count=0
         dms=dist_matrix_size+total_add_waste_size
         dmw=dist_matrix_weight+total_add_waste_weight
         previous_result_size=dms[0:N, 23]
@@ -245,24 +234,21 @@ while True:
         add_waste_weight[add_waste_weight>0]=0.0
         
         
-    if day%7==0 and count==0:
-        week=week+1
+    if day_of_week == "Sun":
+       week=week+1
 
-    conn = mysql.connector.connect(user=user,
-                                   password=password,
-                                   host=broker,
-                                   database=database)
+   
 
     for i in range (N):
         
-        size[i]=dist_matrix_size.item((i, j))+total_add_waste_size.item((i,j))
-        weight[i]=dist_matrix_weight.item((i, j))+total_add_waste_weight.item((i,j))
+        size[i]=dist_matrix_size.item((i, current_hour))+total_add_waste_size.item((i,current_hour))
+        weight[i]=dist_matrix_weight.item((i, current_hour))+total_add_waste_weight.item((i,current_hour))
         
 
         if size[i]>=100:
             size[i]=100
             bin_full[i]=True
-            dist_matrix_weight[i, count:24]=np.repeat(dist_matrix_weight[i, count], 24-count).reshape((1, 24-count))
+            dist_matrix_weight[i, current_hour:24]=np.repeat(dist_matrix_weight[i, current_hour], 24-current_hour).reshape((1, 24-current_hour))
             current_bin_pos=pos[i]
             dist,ind = spatial.KDTree(pos).query(current_bin_pos,2)
             ind=ind[1]
@@ -270,33 +256,46 @@ while True:
             mult_matrix_weight=np.outer(weight, bin_behavior)
             counter=1
 
-            waste_reposition(N, size[ind], pos[i], mult_matrix_size[i,count], mult_matrix_weight[i,count], ind, count, counter)
+            waste_reposition(N, size[ind], pos[i], mult_matrix_size[i,current_hour], mult_matrix_weight[i,current_hour], ind, current_hour, counter)
         
             total_add_waste_size=np.cumsum(add_waste_size,axis=1)
             total_add_waste_weight=np.cumsum(add_waste_weight,axis=1)
          
 
         bin_name= "12%s" % i
-        bin_level= size[i] + random.choice([-2,-1, 0, 0, 0.5, 0, 1, 2 ,3])
-        bin_weight= weight[i] * 17  + random.choice([-2,-1, 0, 0, 0.5, 0, 1, 2 ,3])
+        bin_level= size[i] + random.choice([0,0, 0, 0, 0.5, 0, 1, 2 ,3,1,1,0,0])
+        bin_weight= weight[i] * 17  + random.choice([0,0, 0, 0, 0.5, 0, 1, 2 ,3,0,0,1,1,6])
         bin_position_lon=pos[i][0]
         bin_position_lat=pos[i][1]
-        
+            
+        json_bin = {
+                    "height": bin_level,
+                    "total_height": TOTAL_HEIGHT,
+                    "weight": bin_weight,
+                    "username_": str(bin_name)
+        }
+
+        print(json_bin)
+        client.publish("smartbin/info", json.dumps(json_bin))
         client.publish("house/%s/bin_name" % bin_name, bin_name)
         client.publish("house/%s/fillpercentage" % bin_name, bin_level)
         client.publish("house/%s/weight" % bin_name, bin_weight)
         client.publish("house/%s/position_lon" % bin_name, bin_position_lon)
         client.publish("house/%s/position_lat" % bin_name, bin_position_lat)
-        record=[week, day_of_week, count, bin_name, bin_level, bin_weight]
-        
 
-        
+        record=[week, day_of_week, current_hour, bin_name, bin_level, bin_weight]
+         
+
+        conn = mysql.connector.connect(user=user,
+                                       password=password,
+                                       host=broker,
+                                       database=database)
 
         c=conn.cursor() #cursor to create, modify and query tables in the db
         weight_record = [bin_name, bin_weight]
         height_record = [bin_name, bin_level, TOTAL_HEIGHT]
-        c.execute("INSERT INTO bin_weight (bin_id, weight) VALUES (%s,%s)", weight_record) 
-        c.execute("INSERT INTO bin_height (bin_id, height, total_height) VALUES (%s,%s,%s)", height_record) 
+        #c.execute("INSERT INTO bin_weight (bin_id, weight) VALUES (%s,%s)", weight_record) 
+        #c.execute("INSERT INTO bin_height (bin_id, height, total_height) VALUES (%s,%s,%s)", height_record) 
 
         conn.commit()
 
@@ -313,15 +312,15 @@ while True:
     conn.close()                 
     j=j+1
     
-    day_of_week=dow(day)
-    client.publish("house/day" , day_of_week)
-    client.publish("house/hour" , count)
-    client.publish("house/week" , week)
+    
+    #client.publish("house/day" , day_of_week)
+    #client.publish("house/hour" , count)
+    #client.publish("house/week" , week)
 
-    recolection(day_of_week, count, recolection_day, recolection_hour,size, weight, total_add_waste_size, total_add_waste_weight)
+    recolection(day_of_week, current_hour, recolection_day, recolection_hour,size, weight, total_add_waste_size, total_add_waste_weight, current_hour)
    
     print ("---------")
-    count=count+1
+    #count=count+1
     
     
     sleep(TIME)
