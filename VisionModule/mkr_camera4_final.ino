@@ -47,10 +47,12 @@
   #endif
 #else
   //MQTT info
-  #define host "10.172.0.11"
+  #define host "192.168.0.105"
   #define api_page "/image_api.php"
-  #define wifi_ssid "IoTPolimi"
-  #define wifi_password "ZpvYs=gT-p3DK3wb"
+  #define wifi_ssid "VodafoneMobileWiFi-ECE395"
+ #define wifi_password "3890107988"
+  // #define wifi_ssid "IoTPolimi"
+  //#define wifi_password "ZpvYs=gT-p3DK3wb"
 #endif
 
 
@@ -352,8 +354,8 @@ uint8_t read_fifo_burst(ArduCAM myCAM, String CAM_NAME) {
   }
   Serial.println("Stringa letta: "+response);
   client.stop();
-  WiFi.disconnect();
-  WiFi.end();
+  //WiFi.disconnect();
+  //WiFi.end();
 }
 
 String getResponse(){
@@ -361,11 +363,12 @@ String getResponse(){
   bool startFound = false;
   bool endFound = false;
   char c;
+  Serial.println("funzione");
   while (client.connected()) {
     while (client.available()) {
       // Read answer
       c = client.read();
-       //Serial.print(c);
+      Serial.print(c);
       if ( !startFound && c == '%') {
         //Starting char found
         startFound = true;
